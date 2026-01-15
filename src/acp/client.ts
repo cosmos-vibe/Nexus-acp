@@ -32,6 +32,9 @@ export type ACPConnectionState =
 type StateChangeCallback = (state: ACPConnectionState) => void;
 type SessionUpdateCallback = (update: SessionNotification) => void;
 type StderrCallback = (data: string) => void;
+type PermissionRequestCallback = (
+  params: RequestPermissionRequest
+) => Promise<RequestPermissionResponse>;
 
 export type SpawnFunction = (
   command: string,
@@ -56,6 +59,7 @@ export class ACPClient {
   private stateChangeListeners: Set<StateChangeCallback> = new Set();
   private sessionUpdateListeners: Set<SessionUpdateCallback> = new Set();
   private stderrListeners: Set<StderrCallback> = new Set();
+  private permissionRequestHandler: PermissionRequestCallback | null = null;
   private agentConfig: AgentConfig;
   private spawnFn: SpawnFunction;
   private skipAvailabilityCheck: boolean;
@@ -98,6 +102,13 @@ export class ACPClient {
     return () => this.stderrListeners.delete(callback);
   }
 
+  setOnPermissionRequest(callback: PermissionRequestCallback): () => void {
+    this.permissionRequestHandler = callback;
+    return () => {
+      this.permissionRequestHandler = null;
+    };
+  }
+
   isConnected(): boolean {
     return this.state === "connected" && this.connection !== null;
   }
@@ -123,6 +134,7 @@ export class ACPClient {
     // Track if process exits during connection
     let processExited = false;
     let exitCode: number | null = null;
+    let stderrOutput = "";
 
     // Increment process ID to invalidate old handlers
     const currentProcessId = ++this.processId;
@@ -139,6 +151,7 @@ export class ACPClient {
 
       this.process.stderr?.on("data", (data: Buffer) => {
         const text = data.toString();
+        stderrOutput += text;
         console.error("[ACP stderr]", text);
         this.stderrListeners.forEach((cb) => cb(text));
       });
@@ -171,9 +184,12 @@ export class ACPClient {
       // Give process a moment to fail immediately if command doesn't exist
       await new Promise((resolve) => setTimeout(resolve, 50));
       if (processExited || !this.process) {
+        const stderrInfo = stderrOutput.trim()
+          ? `\n\nError output:\n${stderrOutput.trim()}`
+          : "";
         throw new Error(
           `Agent process exited immediately (code: ${exitCode}). ` +
-            `Make sure "${this.agentConfig.command}" is properly installed.`
+            `Make sure "${this.agentConfig.command}" is properly installed.${stderrInfo}`
         );
       }
 
@@ -198,6 +214,11 @@ export class ACPClient {
             "[ACP] Permission request:",
             JSON.stringify(params, null, 2)
           );
+
+          if (this.permissionRequestHandler) {
+            return this.permissionRequestHandler(params);
+          }
+
           const allowOption = params.options.find(
             (opt) => opt.kind === "allow_once" || opt.kind === "allow_always"
           );
