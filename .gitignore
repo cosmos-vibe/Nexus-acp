@@ -1,0 +1,16 @@
+node_modules
+*.vsix
+dist
+out
+.vscode-test
+.beads/
+coverage/
+test-results/
+playwright-report/
+
+@AGENTS.md
+mise.toml
+AGENTS.md
+
+# QDM - User specific
+_sdd/_user/

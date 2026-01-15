@@ -1,0 +1,48 @@
+# QDM Work Index
+# 전체 작업 목록과 상태를 한눈에 파악
+
+metadata:
+  created: "{{date}}"
+  last_updated: "{{date}}"
+  total_items: 0
+  active_items: 0
+  completed_items: 0
+
+# STATUS DEFINITIONS:
+# ===================
+# - in-progress: 진행 중
+# - blocked: 막힘 (이슈 있음)
+# - ready-for-dev: 문서화 완료, 개발 대기
+# - done: 완료
+
+# 진행 중인 작업
+active_work: {}
+  # feature-login:
+  #   type: feature
+  #   title: "로그인 기능"
+  #   status: ready-for-dev
+  #   created: "2026-01-08"
+  #   priority: high
+  #   folder: "feature-login"
+  #
+  # bug-api-error:
+  #   type: bug
+  #   title: "API 타임아웃"
+  #   status: investigating
+  #   created: "2026-01-08"
+  #   priority: medium
+  #   folder: "bug-api-error"
+
+# 완료된 작업
+completed_work: {}
+  # feature-signup:
+  #   type: feature
+  #   title: "회원가입"
+  #   status: done
+  #   completed: "2026-01-07"
+  #   folder: "feature-signup"
+
+# 아카이브된 작업 참조
+archived_items: {}
+  # 2026-01:
+  #   - feature-old: "moved to _archive/2026-01/"

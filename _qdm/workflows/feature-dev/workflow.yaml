@@ -1,0 +1,80 @@
+# Feature Development Workflow Configuration
+# bmb 표준 형식
+
+name: "feature-dev"
+description: "Feature development workflow with spec + plan + status"
+version: "1.0.0"
+author: "QDM Team"
+
+# ===== Config 참조 (bmb 표준) =====
+config_source: "{project-root}/{qdm_root}/config.yaml"
+
+# 상속 변수
+output_folder: "{config_source}:output_folder"
+user_name: "{config_source}:user_name"
+communication_language: "{config_source}:communication_language"
+skill_level: "{config_source}:skill_level"
+sdd_root: "{config_source}:sdd_root"
+templates_path: "{config_source}:templates_path"
+profile_path: "{config_source}:profile_path"
+
+# 시스템 생성
+date: system-generated
+
+# ===== 모듈 경로 =====
+installed_path: "{project-root}/{qdm_root}/workflows/feature-dev"
+steps_path: "{installed_path}/steps"
+
+# ===== 워크플로우 파일 =====
+instructions: "{installed_path}/instructions.md"
+template: false  # action-workflow (템플릿 기반 아님)
+
+# ===== 출력 설정 =====
+default_output_folder: "{sdd_root}/feature-{{feature_name}}"
+output_files:
+  meta: "{default_output_folder}/meta.yaml"
+  spec: "{default_output_folder}/spec.md"
+  plan: "{default_output_folder}/plan.md"
+  status: "{default_output_folder}/status.md"
+
+# ===== 템플릿 경로 =====
+template_meta: "{templates_path}/feature/meta.yaml.template"
+template_spec: "{templates_path}/feature/spec.md.template"
+template_plan: "{templates_path}/feature/plan.md.template"
+template_status: "{templates_path}/feature/status.md.template"
+
+# ===== Steps =====
+steps:
+  - step: 1
+    name: "init"
+    file: "{steps_path}/step-01-init.md"
+    goal: "폴더 생성 및 초기화"
+  - step: 2
+    name: "requirement-research"
+    file: "{steps_path}/step-02-requirement-research.md"
+    goal: "요구사항 분석 및 리서치"
+  - step: 3
+    name: "codebase-analysis"
+    file: "{steps_path}/step-03-codebase-analysis.md"
+    goal: "코드베이스 분석"
+  - step: 4
+    name: "spec-creation"
+    file: "{steps_path}/step-04-spec-creation.md"
+    goal: "spec.md 생성"
+  - step: 5
+    name: "plan-creation"
+    file: "{steps_path}/step-05-plan-creation.md"
+    goal: "plan.md 생성"
+  - step: 6
+    name: "status-init"
+    file: "{steps_path}/step-06-status-init.md"
+    goal: "status.md 초기화"
+  - step: 7
+    name: "ready-for-dev"
+    file: "{steps_path}/step-07-ready-for-dev.md"
+    goal: "개발 준비 완료"
+
+# ===== 워크플로우 설정 =====
+standalone: true
+allow_resume: true
+track_progress: true

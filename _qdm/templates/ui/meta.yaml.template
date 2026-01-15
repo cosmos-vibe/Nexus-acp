@@ -1,0 +1,24 @@
+# UI: {{title}}
+type: ui
+created: "{{date}}"
+updated: "{{date}}"
+status: in-progress  # in-progress | done
+priority: low  # high | medium | low
+
+# 요약
+summary: "{{summary}}"
+request: "{{request}}"
+
+# 경량 판단
+is_lightweight: true  # true if files <= 2, no logic change, < 30min
+estimated_files: []
+
+# 문서
+documents:
+  status: null
+
+# 연관 작업
+related: []
+
+# 태그
+tags: []

@@ -1,0 +1,54 @@
+# User Profile
+# AI가 지속적으로 업데이트하며 참조
+
+user_name: "{{user_name}}"
+created: "{{date}}"
+updated: "{{date}}"
+
+# 전체 수준 (AI가 종합 판단)
+# beginner: 개발 경험 거의 없음
+# intermediate: 기본 개념 이해, 간단한 코드 작성 가능
+# advanced: 독립적 개발 가능, 아키텍처 이해
+# expert: 깊은 전문 지식 보유
+overall_level: {{skill_level}}
+
+# 영역별 세부 수준
+skills:
+  frontend:
+    level: null  # none | beginner | intermediate | advanced | expert
+    evidence: []
+    gaps: []
+
+  backend:
+    level: null
+    evidence: []
+    gaps: []
+
+  database:
+    level: null
+    evidence: []
+    gaps: []
+
+  devops:
+    level: null
+    evidence: []
+    gaps: []
+
+  debugging:
+    level: null
+    evidence: []
+    gaps: []
+
+# 선호하는 설명 방식
+preferences:
+  detail_level: normal  # minimal | normal | detailed
+  use_analogies: true   # 비유 사용 선호
+  show_examples: true   # 예시 코드 선호
+  language: {{communication_language}}
+
+# 프롬프트 히스토리 기반 판단 로그 (최근 N개)
+assessment_log: []
+  # - date: "2026-01-08"
+  #   prompt_sample: "버튼 색상 어떻게 바꿔?"
+  #   inferred: "CSS 기본 문법 모를 수 있음"
+  #   adjusted: "frontend.level: beginner"

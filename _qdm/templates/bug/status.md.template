@@ -1,0 +1,111 @@
+---
+title: "{{title}}"
+created: "{{date}}"
+updated: "{{date}}"
+status: investigating  # investigating | root-cause-found | fixing | testing | done
+complexity: {{complexity}}  # simple | complex
+---
+
+# Bug: {{title}}
+
+## Summary
+
+**증상:** {{symptom}}
+
+**예상 동작:** {{expected_behavior}}
+
+**실제 동작:** {{actual_behavior}}
+
+**에러 메시지:**
+```
+{{error_message}}
+```
+
+---
+
+## Reproduce Steps
+
+1. {{step_1}}
+2. {{step_2}}
+3. {{step_3}}
+
+---
+
+## Investigation Log
+
+<!-- 조사 과정을 기록 (append-only) -->
+
+### {{date}} - Investigation
+
+**가설:** {{hypothesis}}
+
+**검증 방법:** {{verification_method}}
+
+**결과:** {{result}}
+
+---
+
+## Root Cause
+
+<!-- 원인 파악 후 작성 -->
+
+**원인:** {{root_cause}}
+
+**상세:** {{root_cause_detail}}
+
+**증거:** {{evidence}}
+
+**영향 범위:** {{affected_scope}}
+
+---
+
+## Fix Plan
+
+### Files to Modify
+
+| 파일 | 변경 내용 |
+|------|----------|
+| {{file_1}} | {{change_1}} |
+
+### Tasks
+
+- [ ] T-1: {{fix_task_1}}
+- [ ] T-2: {{fix_task_2}}
+
+### Test Scenarios
+
+- [ ] TC-1: {{test_scenario_1}}
+
+---
+
+## Work Log
+
+### {{date}}
+
+**작업 내용:**
+- 버그 조사 시작
+
+---
+
+## Debug Log
+
+| 날짜 | 문제 | 시도 | 결과 |
+|------|------|------|------|
+| | | | |
+
+---
+
+## File List
+
+| 파일 | 상태 | 설명 |
+|------|------|------|
+| | modified | |
+
+---
+
+## Completion Notes
+
+<!-- 완료 시 작성 -->
+- **해결 방법:** {{fix_description}}
+- **테스트:** {{test_result}}
+- **회귀 방지:** {{regression_prevention}}

@@ -1,0 +1,60 @@
+---
+title: "{{title}}"
+created: "{{date}}"
+updated: "{{date}}"
+status: in-progress  # in-progress | blocked | review | done
+spec_ref: "spec.md"
+plan_ref: "plan.md"
+---
+
+# Status: {{title}}
+
+## Tasks / Subtasks
+
+<!-- plan.md에서 복사하여 진행하며 체크 -->
+- [ ] **T-1: {{task_1_name}}** (AC: #1)
+  - [ ] T-1.1: {{subtask_1_1}}
+  - [ ] T-1.2: {{subtask_1_2}}
+  - [ ] T-1.3: {{subtask_1_3}}
+
+- [ ] **T-2: {{task_2_name}}** (AC: #2)
+  - [ ] T-2.1: {{subtask_2_1}}
+  - [ ] T-2.2: {{subtask_2_2}}
+
+- [ ] **T-3: {{task_3_name}}** (AC: #3)
+  - [ ] T-3.1: {{subtask_3_1}}
+
+---
+
+## Work Log
+
+### {{date}}
+
+**작업 내용:**
+- spec.md, plan.md, status.md 초기화 완료
+- 개발 준비 완료
+
+---
+
+## Debug Log
+
+| 날짜 | 문제 | 시도 | 결과 |
+|------|------|------|------|
+| | | | |
+
+---
+
+## File List
+
+| 파일 | 상태 | 설명 |
+|------|------|------|
+| | new / modified / deleted | |
+
+---
+
+## Completion Notes
+
+<!-- 완료 시 작성 -->
+- {{completion_summary}}
+- {{tests_added}}
+- {{final_result}}

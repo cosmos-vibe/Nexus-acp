@@ -1,0 +1,19 @@
+# QDM Configuration
+# Generated: 2026-01-09
+
+user_name: "전도현"
+communication_language: "korean"
+skill_level: "intermediate"
+team_size: "solo"
+project_type: "brownfield"
+
+# Paths
+sdd_root: "_sdd"
+qdm_root: "_qdm"
+profile_path: "_sdd/_user/profile.yaml"
+index_path: "_sdd/index.yaml"
+templates_path: "_qdm/templates"
+
+# Features
+enable_auto_profile_update: true
+enable_failure_learning: true

@@ -1,0 +1,40 @@
+# Bug: {{title}}
+type: bug
+created: "{{date}}"
+updated: "{{date}}"
+status: investigating  # investigating | root-cause-found | fixing | testing | done
+priority: medium  # critical | high | medium | low
+complexity: unknown  # simple | complex | unknown
+
+# 요약
+summary: "{{summary}}"
+symptom: "{{symptom}}"
+
+# 재현 정보
+reproduce_steps: []
+expected_behavior: "{{expected}}"
+actual_behavior: "{{actual}}"
+error_message: "{{error_message}}"
+
+# 워크플로우 진행 상황
+stepsCompleted: []
+workflow_path: null  # simple | complex
+
+# Root Cause (조사 후 채워짐)
+root_cause: null
+affected_files: []
+
+# 해결 정보 (완료 후 채워짐)
+resolved_at: null
+fix_description: null
+
+# 문서
+documents:
+  status: null
+
+# 연관 작업
+related_feature: null
+related: []
+
+# 태그
+tags: []

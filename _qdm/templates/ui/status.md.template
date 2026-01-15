@@ -1,0 +1,47 @@
+---
+title: "{{title}}"
+created: "{{date}}"
+updated: "{{date}}"
+status: in-progress  # in-progress | done
+---
+
+# UI: {{title}}
+
+## Request
+
+{{request_description}}
+
+## Expected Changes
+
+| 파일 | 변경 내용 |
+|------|----------|
+| {{file_1}} | {{change_1}} |
+
+## Tasks
+
+- [ ] T-1: {{task_1}}
+- [ ] T-2: {{task_2}}
+
+---
+
+## Work Log
+
+### {{date}}
+
+**작업 내용:**
+- UI 변경 시작
+
+---
+
+## File List
+
+| 파일 | 상태 | 설명 |
+|------|------|------|
+| | modified | |
+
+---
+
+## Completion Notes
+
+<!-- 완료 시 작성 -->
+- {{completion_summary}}

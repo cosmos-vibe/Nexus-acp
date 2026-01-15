@@ -1,0 +1,280 @@
+{
+  "name": "nexus-acp",
+  "displayName": "Nexus ACP",
+  "description": "AI coding agents in VS Code via Agent Client Protocol (ACP). Chat with Claude, OpenCode, and other ACP-compatible agents directly in your editor.",
+  "version": "0.1.4",
+  "publisher": "cosmosjeon",
+  "icon": "assets/icon.png",
+  "preview": true,
+  "pricing": "Free",
+  "qna": "marketplace",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cosmosjeon/nexus-acp"
+  },
+  "engines": {
+    "vscode": "^1.74.0",
+    "node": "^22"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "claude",
+    "opencode",
+    "acp",
+    "agent",
+    "chat",
+    "copilot",
+    "coding assistant",
+    "llm"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "The extension can run in untrusted workspaces but some features may be limited."
+    },
+    "virtualWorkspaces": true
+  },
+  "activationEvents": [
+    "onView:nexus.welcomeView"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "nexus.focusChat",
+        "title": "Nexus",
+        "category": "Nexus",
+        "icon": {
+          "light": "assets/icon-light.svg",
+          "dark": "assets/icon-dark.svg"
+        }
+      },
+      {
+        "command": "nexus.startChat",
+        "title": "Start Chat",
+        "category": "Nexus",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "nexus.newChat",
+        "title": "New Chat",
+        "category": "Nexus",
+        "icon": "$(add)"
+      },
+      {
+        "command": "nexus.clearChat",
+        "title": "Clear Chat",
+        "category": "Nexus",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "nexus.newChatWindow",
+        "title": "New Chat Window",
+        "category": "Nexus",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "nexus.attachSelection",
+        "title": "Send to Nexus Chat",
+        "category": "Nexus",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "nexus.attachFile",
+        "title": "Send to Nexus Chat",
+        "category": "Nexus",
+        "icon": "$(comment-discussion)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "nexus",
+          "title": "Nexus",
+          "icon": "assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "nexus": [
+        {
+          "type": "tree",
+          "id": "nexus.welcomeView",
+          "name": "Nexus"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "nexus.welcomeView",
+        "contents": "Nexus Chat을 에디터에서 엽니다.\n[Chat 열기](command:nexus.startChat)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "nexus.startChat",
+          "when": "view == nexus.welcomeView",
+          "group": "navigation@0"
+        },
+        {
+          "command": "nexus.newChatWindow",
+          "when": "view == nexus.welcomeView",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "nexus.focusChat",
+          "group": "navigation@-1"
+        },
+        {
+          "command": "nexus.newChatWindow",
+          "when": "activeWebviewPanelId == nexus.chatPanel",
+          "group": "navigation@0"
+        },
+        {
+          "command": "nexus.newChat",
+          "when": "activeWebviewPanelId == nexus.chatPanel",
+          "group": "navigation@1"
+        },
+        {
+          "command": "nexus.clearChat",
+          "when": "activeWebviewPanelId == nexus.chatPanel",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "nexus.startChat",
+          "when": "true"
+        },
+        {
+          "command": "nexus.newChat",
+          "when": "true"
+        },
+        {
+          "command": "nexus.clearChat",
+          "when": "true"
+        },
+        {
+          "command": "nexus.newChatWindow",
+          "when": "true"
+        },
+        {
+          "command": "nexus.attachSelection",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "nexus.attachFile",
+          "when": "false"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "nexus.attachSelection",
+          "when": "editorHasSelection",
+          "group": "9_cutcopypaste@100"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "nexus.attachFile",
+          "when": "!explorerResourceIsFolder",
+          "group": "7_modification@100"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run build:webview && node esbuild.js",
+    "check-types": "tsc --noEmit",
+    "build:webview": "cd src/views/webview && npx vite build",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "watch:webview": "cd src/views/webview && npx vite build --watch",
+    "package": "npm run check-types && npm run build:webview && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "pretest": "npm run compile-tests && npm run compile",
+    "test": "vscode-test",
+    "precoverage": "npm run compile-tests && npm run compile",
+    "coverage": "vscode-test --coverage --coverage-output coverage --coverage-reporter lcov --coverage-reporter text",
+    "coverage:html": "vscode-test --coverage --coverage-reporter html",
+    "lint": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "prepare": "husky",
+    "screenshot": "npx tsx scripts/screenshot.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@playwright/test": "^1.57.0",
+    "@types/jsdom": "^27.0.0",
+    "@types/marked": "^5.0.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "18.x",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.0.0",
+    "autoprefixer": "^10.4.23",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "jsdom": "^27.3.0",
+    "lint-staged": "^16.2.7",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.4.1"
+  },
+  "dependencies": {
+    "@agentclientprotocol/sdk": "^0.12.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.522.0",
+    "marked": "^17.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-sanitize": "^6.0.0",
+    "tailwind-merge": "^3.3.1",
+    "vscode-jsonrpc": "^8.2.0",
+    "zustand": "^5.0.4"
+  },
+  "lint-staged": {
+    "*.{ts,js,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html}": [
+      "prettier --write"
+    ]
+  }
+}

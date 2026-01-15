@@ -1,0 +1,51 @@
+# Feature: {{title}}
+type: feature
+created: "{{date}}"
+updated: "{{date}}"
+status: in-progress  # in-progress | blocked | ready-for-dev | done
+priority: medium  # critical | high | medium | low
+
+# 요약
+summary: "{{summary}}"
+goal: "{{goal}}"
+
+# 워크플로우 진행 상황
+stepsCompleted: []
+workflow_completed: false
+ready_for_dev: false
+
+# 요구사항 (step-02에서 채워짐)
+requirements:
+  problem: ""
+  users: ""
+  success_criteria: ""
+  functional: []
+  non_functional: []
+
+# 코드베이스 분석 (step-03에서 채워짐)
+codebase_analysis:
+  framework: ""
+  architecture: ""
+  related_code: []
+  dependencies:
+    internal: []
+    external: []
+  file_plan:
+    create: []
+    modify: []
+    reference: []
+
+# 문서
+documents:
+  spec: null
+  plan: null
+  status: null
+
+# 관련 버그 (개발 중 발생 시 추가)
+bugs: []
+
+# 연관 작업
+related: []
+
+# 태그
+tags: []

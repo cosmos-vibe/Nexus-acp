@@ -1,0 +1,2632 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexus - AI Coding Agents in VS Code</title>
+    <meta
+      name="description"
+      content="Chat with Claude, OpenCode, and other ACP-compatible agents directly in your editor."
+    />
+    <style>
+      :root {
+        --bg-body: #050505;
+        --bg-card: #0a0a0a;
+        --bg-card-hover: #111111;
+        --text-main: #ffffff;
+        --text-muted: #a1a1aa;
+        --accent: #3b82f6;
+        --accent-glow: rgba(59, 130, 246, 0.15);
+        --border: #27272a;
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol";
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        font-family: var(--font-sans);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.2s;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      /* Utilities */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .items-center {
+        align-items: center;
+      }
+
+      .justify-between {
+        justify-content: space-between;
+      }
+
+      .justify-center {
+        justify-content: center;
+      }
+
+      .grid {
+        display: grid;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .text-gradient {
+        background: linear-gradient(to right, #fff, #a1a1aa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Header */
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        background: rgba(5, 5, 5, 0.8);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        height: 70px;
+      }
+
+      .nav-inner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: white;
+      }
+
+      .logo svg {
+        width: 28px;
+        height: auto;
+      }
+
+      .nav-links {
+        display: none;
+        gap: 2rem;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+      }
+
+      .nav-links a:hover {
+        color: white;
+      }
+
+      @media (min-width: 768px) {
+        .nav-links {
+          display: flex;
+        }
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1.25rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: 1px solid transparent;
+      }
+
+      .btn-primary {
+        background-color: white;
+        color: black;
+      }
+
+      .btn-primary:hover {
+        background-color: #e4e4e7;
+        transform: translateY(-1px);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        border-color: #3f3f46;
+        color: white;
+      }
+
+      .btn-outline:hover {
+        border-color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .btn-sm {
+        padding: 0.4rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      /* Hero */
+      #hero {
+        padding-top: 160px;
+        padding-bottom: 80px;
+        position: relative;
+      }
+
+      /* Background glow effect */
+      .glow {
+        position: absolute;
+        width: 1200px;
+        height: 1200px;
+        background: radial-gradient(
+          circle,
+          rgba(59, 130, 246, 0.35) 0%,
+          rgba(59, 130, 246, 0.15) 30%,
+          rgba(59, 130, 246, 0.05) 50%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+        pointer-events: none;
+        animation: pulse-glow 4s ease-in-out infinite;
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.5);
+          opacity: 0.7;
+        }
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 3rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.5rem;
+        font-weight: 800;
+      }
+
+      .subtitle {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+      }
+
+      @media (min-width: 768px) {
+        h1 {
+          font-size: 4.5rem;
+        }
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 4rem;
+        flex-direction: column;
+      }
+
+      @media (min-width: 640px) {
+        .hero-actions {
+          flex-direction: row;
+        }
+      }
+
+      /* VS Code Window Frame - Matching Real Nexus Screenshot */
+      .vscode-window {
+        background-color: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        border: 1px solid #333;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        height: 650px;
+        text-align: left;
+        position: relative;
+        z-index: 10;
+      }
+
+      .vscode-title-bar {
+        background-color: #323233;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        font-size: 13px;
+        color: #999;
+        justify-content: center;
+        position: relative;
+        user-select: none;
+        border-bottom: 1px solid #252526;
+        flex-shrink: 0;
+      }
+
+      .vscode-traffic-lights {
+        display: flex;
+        gap: 8px;
+        position: absolute;
+        left: 12px;
+      }
+
+      .traffic-light {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .traffic-light.close {
+        background-color: #ff5f56;
+      }
+      .traffic-light.minimize {
+        background-color: #ffbd2e;
+      }
+      .traffic-light.maximize {
+        background-color: #27c93f;
+      }
+
+      .vscode-body {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .vscode-activity-bar {
+        width: 48px;
+        background-color: #333333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 4px;
+        flex-shrink: 0;
+      }
+
+      .vscode-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #858585;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.1s;
+      }
+
+      .vscode-icon:hover {
+        color: #ffffff;
+      }
+      .vscode-icon.active {
+        color: #ffffff;
+      }
+      .vscode-icon.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 24px;
+        background: #fff;
+      }
+
+      .vscode-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+
+      .vscode-icon .badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #007acc;
+        color: white;
+        font-size: 9px;
+        font-weight: 600;
+        padding: 1px 4px;
+        border-radius: 8px;
+        min-width: 14px;
+        text-align: center;
+      }
+
+      .vscode-main-area {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* Nexus Tab Bar */
+      .nexus-tab-bar {
+        background-color: #252526;
+        height: 35px;
+        display: flex;
+        align-items: stretch;
+        flex-shrink: 0;
+      }
+
+      .nexus-tab {
+        background-color: #1e1e1e;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 13px;
+        border-top: 1px solid #007fd4;
+        cursor: pointer;
+      }
+
+      .nexus-tab svg {
+        width: 16px;
+        height: 16px;
+      }
+      .nexus-tab-close {
+        margin-left: 8px;
+        opacity: 0.6;
+        font-size: 16px;
+      }
+      .nexus-tab-close:hover {
+        opacity: 1;
+      }
+
+      /* Nexus Content Area */
+      .nexus-content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* Nexus Sidebar */
+      .nexus-sidebar {
+        width: 260px;
+        background: #f9fafb;
+        border-right: 1px solid #e5e5e5;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+
+      .nexus-sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      .nexus-sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .nexus-sidebar-logo svg {
+        width: 20px;
+        height: 20px;
+        color: #0a0a0a;
+      }
+
+      .nexus-sidebar-logo span {
+        font-weight: 600;
+        font-size: 14px;
+        color: #0a0a0a;
+      }
+
+      .nexus-sidebar-collapse {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #737373;
+      }
+      .nexus-sidebar-collapse:hover {
+        background: #e5e5e5;
+      }
+
+      .nexus-new-chat {
+        margin: 12px 12px 8px;
+        padding: 8px 12px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #0a0a0a;
+        cursor: pointer;
+        text-align: left;
+      }
+      .nexus-new-chat:hover {
+        background: #f0f0f0;
+      }
+      .nexus-new-chat svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .nexus-sessions {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 8px 12px;
+      }
+
+      .nexus-agent-group {
+        padding: 12px 8px 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #737373;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .nexus-session {
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0a0a0a;
+        cursor: pointer;
+        transition: background 0.15s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nexus-session:hover {
+        background: #f0f0f0;
+      }
+      .nexus-session.active {
+        background: #e8e8e8;
+      }
+      .nexus-session-time {
+        font-size: 12px;
+        color: #a3a3a3;
+      }
+
+      /* Nexus Chat Area */
+      .nexus-chat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        min-width: 0;
+      }
+
+      .nexus-chat-status {
+        text-align: center;
+        padding: 12px;
+        font-size: 13px;
+        color: #737373;
+      }
+
+      .nexus-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 24px;
+      }
+
+      .nexus-message {
+        max-width: 800px;
+        margin: 0 auto 20px;
+      }
+
+      .nexus-message.user {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .nexus-message.user .nexus-bubble {
+        background: #f5f5f5;
+        border-radius: 20px;
+        padding: 10px 18px;
+        font-size: 14px;
+        color: #0a0a0a;
+        line-height: 1.5;
+        max-width: 70%;
+      }
+
+      .nexus-message.assistant .nexus-bubble {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #0a0a0a;
+      }
+
+      .nexus-copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #737373;
+        cursor: pointer;
+        margin-top: 12px;
+      }
+      .nexus-copy-btn:hover {
+        background: #f5f5f5;
+        color: #0a0a0a;
+      }
+      .nexus-copy-btn svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      /* Nexus Input Area */
+      .nexus-input-area {
+        padding: 16px 24px 20px;
+        background: #ffffff;
+      }
+
+      .nexus-input-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .nexus-input {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 20px;
+        padding: 10px 6px 6px;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.2s;
+      }
+      .nexus-input:focus-within {
+        border-color: #3b82f6;
+      }
+
+      .nexus-input-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px 8px;
+        font-size: 12px;
+      }
+
+      .nexus-input-dot {
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
+        border-radius: 50%;
+      }
+
+      .nexus-input-agent {
+        color: #525252;
+        font-weight: 500;
+      }
+
+      .nexus-input-mode {
+        padding: 2px 8px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #737373;
+      }
+
+      .nexus-input-field {
+        flex: 1;
+        min-height: 24px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #0a0a0a;
+        font-size: 14px;
+        padding: 0 14px 8px;
+        resize: none;
+      }
+      .nexus-input-field::placeholder {
+        color: #a3a3a3;
+      }
+
+      .nexus-input-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 6px;
+      }
+
+      .nexus-input-left {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .nexus-action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #737373;
+        position: relative;
+      }
+      .nexus-action-btn:hover {
+        background: #f5f5f5;
+        color: #0a0a0a;
+      }
+      .nexus-action-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .nexus-action-btn .green-dot {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 6px;
+        height: 6px;
+        background: #22c55e;
+        border-radius: 50%;
+      }
+
+      /* Settings Dropdown */
+      .settings-dropdown-wrapper {
+        position: relative;
+      }
+
+      .settings-dropdown {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 0;
+        width: 240px;
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        z-index: 1000;
+        overflow: hidden;
+      }
+
+      .settings-dropdown.show {
+        display: block;
+        animation: dropdownFadeIn 0.15s ease-out;
+      }
+
+      @keyframes dropdownFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .dropdown-section {
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .dropdown-section:last-child {
+        border-bottom: none;
+      }
+
+      .dropdown-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #737373;
+      }
+
+      .status-dot.connected {
+        background: #22c55e;
+      }
+
+      .status-dot.connecting {
+        background: #f59e0b;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .status-text {
+        font-size: 13px;
+        color: #0a0a0a;
+      }
+
+      .dropdown-label {
+        display: block;
+        font-size: 11px;
+        color: #737373;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .dropdown-select {
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 13px;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        background: #fafafa;
+        color: #0a0a0a;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+      }
+
+      .dropdown-select:hover {
+        border-color: #d4d4d4;
+        background-color: #f5f5f5;
+      }
+
+      .dropdown-select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      }
+
+      .nexus-send-btn {
+        width: 36px;
+        height: 36px;
+        background: #3b82f6;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+      }
+      .nexus-send-btn:hover {
+        background: #2563eb;
+        transform: scale(1.05);
+      }
+      .nexus-send-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: white;
+        fill: none;
+        stroke-width: 2;
+      }
+
+      /* VS Code Status Bar */
+      .vscode-status-bar {
+        height: 22px;
+        background: #007acc;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 8px;
+        font-size: 12px;
+        color: white;
+        flex-shrink: 0;
+      }
+
+      .status-bar-left,
+      .status-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 0 4px;
+      }
+      .status-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .status-item svg {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        .vscode-activity-bar {
+          display: none;
+        }
+        .nexus-sidebar {
+          display: none;
+        }
+        .vscode-title-bar {
+          display: none;
+        }
+        .vscode-status-bar {
+          display: none;
+        }
+        .vscode-window {
+          height: auto;
+          border: none;
+          background: #f9fafb;
+          box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3);
+          border-radius: 12px;
+        }
+        .nexus-tab-bar {
+          display: none;
+        }
+        .nexus-chat {
+          min-height: 500px;
+          border-radius: 12px;
+        }
+      }
+
+      .demo-sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      .demo-sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .demo-sidebar-logo svg {
+        width: 20px;
+        height: 20px;
+        color: #0a0a0a;
+      }
+
+      .demo-sidebar-logo span {
+        font-weight: 600;
+        font-size: 14px;
+        color: #0a0a0a;
+      }
+
+      .demo-sidebar-close {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #737373;
+      }
+
+      .demo-sidebar-close:hover {
+        background: #e5e5e5;
+      }
+
+      .demo-new-chat {
+        margin: 8px;
+        padding: 8px 12px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #0a0a0a;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .demo-new-chat:hover {
+        background: #f5f5f5;
+      }
+
+      .demo-sessions {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 8px 8px;
+      }
+
+      .demo-agent-group {
+        padding: 8px 8px 4px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #737373;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .demo-session {
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0a0a0a;
+        cursor: pointer;
+        transition: background 0.15s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .demo-session:hover {
+        background: #f5f5f5;
+      }
+
+      .demo-session.active {
+        background: #f5f5f5;
+      }
+
+      .demo-session-time {
+        font-size: 12px;
+        color: #a3a3a3;
+      }
+
+      .demo-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: #ffffff;
+      }
+
+      .demo-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
+
+      .demo-message {
+        max-width: 720px;
+        margin: 0 auto 20px;
+        padding: 0 8px;
+      }
+
+      .demo-message.user {
+        display: grid;
+        grid-template-columns: minmax(72px, 1fr) auto;
+      }
+
+      .demo-message.user .demo-bubble {
+        grid-column: 2;
+        background: #f5f5f5;
+        border-radius: 24px;
+        padding: 10px 20px;
+        font-size: 14px;
+        color: #0a0a0a;
+        line-height: 1.5;
+      }
+
+      .demo-message.assistant {
+        padding: 16px 8px;
+      }
+
+      .demo-message.assistant .demo-bubble {
+        font-size: 14px;
+        line-height: 1.75;
+        color: #0a0a0a;
+      }
+
+      .demo-message.assistant .demo-bubble p {
+        margin: 0 0 12px;
+      }
+
+      .demo-message.assistant .demo-bubble p:last-child {
+        margin-bottom: 0;
+      }
+
+      .demo-message.assistant .demo-bubble code {
+        background: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+        color: #0a0a0a;
+        border: 1px solid #e5e5e5;
+        font-weight: 600;
+      }
+
+      .demo-tool {
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(229, 229, 229, 0.5);
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin: 12px 0;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .demo-tool:hover {
+        background: #f9fafb;
+      }
+
+      .demo-tool-icon {
+        width: 16px;
+        height: 16px;
+        color: #737373;
+      }
+
+      .demo-tool-name {
+        flex: 1;
+        font-weight: 500;
+        color: #0a0a0a;
+      }
+
+      .demo-tool-badge {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        background: #f0fdf4;
+        border-radius: 9999px;
+        font-size: 10px;
+        color: #22c55e;
+      }
+
+      .demo-tool-badge svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .demo-copy-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #737373;
+        cursor: pointer;
+        margin-top: 12px;
+      }
+
+      .demo-copy-btn:hover {
+        background: #f5f5f5;
+        color: #0a0a0a;
+      }
+
+      .demo-copy-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .demo-input-area {
+        padding: 16px;
+        background: #ffffff;
+      }
+
+      .demo-input-wrapper {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      .demo-input {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 24px;
+        padding: 8px 4px;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.2s;
+      }
+
+      .demo-input:focus-within {
+        border-color: #3b82f6;
+      }
+
+      .demo-input-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 12px 6px;
+        font-size: 10px;
+      }
+
+      .demo-input-dot {
+        width: 6px;
+        height: 6px;
+        background: #3b82f6;
+        border-radius: 50%;
+      }
+
+      .demo-input-agent {
+        color: #737373;
+        font-weight: 500;
+      }
+
+      .demo-input-mode {
+        padding: 2px 6px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 500;
+        color: #3b82f6;
+      }
+
+      .demo-input-field {
+        flex: 1;
+        min-height: 44px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #0a0a0a;
+        font-size: 14px;
+        padding: 4px 14px;
+        resize: none;
+      }
+
+      .demo-input-field::placeholder {
+        color: #a3a3a3;
+      }
+
+      .demo-input-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 4px 4px 8px;
+      }
+
+      .demo-input-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .demo-action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #737373;
+      }
+
+      .demo-action-btn:hover {
+        background: #f5f5f5;
+        color: #0a0a0a;
+      }
+
+      .demo-action-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .demo-send-btn {
+        width: 34px;
+        height: 34px;
+        background: #3b82f6;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+      }
+
+      .demo-send-btn:hover {
+        background: #2563eb;
+        transform: scale(1.05);
+      }
+
+      .demo-send-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: white;
+        stroke-width: 2;
+      }
+
+      .demo-thinking {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        font-size: 14px;
+        color: #737373;
+      }
+
+      .demo-thinking-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .demo-thinking-dots span {
+        width: 6px;
+        height: 6px;
+        background: #3b82f6;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite;
+      }
+
+      .demo-thinking-dots span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .demo-thinking-dots span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes bounce {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-4px);
+        }
+      }
+
+      /* Works With Section */
+      #works-with {
+        padding: 60px 0;
+        border-top: 1px solid #111;
+      }
+
+      .works-with-label {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+      }
+
+      .logo-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+      }
+
+      .agent-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .agent-logo:hover {
+        color: white;
+      }
+
+      .agent-logo svg {
+        width: 32px;
+        height: 32px;
+      }
+
+      .agent-logo.opencode svg {
+        width: 100px;
+        height: auto;
+      }
+
+      /* Features */
+      #features {
+        padding: 100px 0;
+        border-top: 1px solid #111;
+      }
+
+      .section-header {
+        margin-bottom: 4rem;
+        text-align: center;
+      }
+
+      .section-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      @media (min-width: 768px) {
+        .features-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .features-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .feature-card {
+        background: var(--bg-card);
+        border: 1px solid #1a1a1a;
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        background: var(--bg-card-hover);
+        border-color: #333;
+        transform: translateY(-4px);
+      }
+
+      .feature-icon {
+        width: 48px;
+        height: 48px;
+        background: #111;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: white;
+      }
+
+      .feature-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: white;
+      }
+
+      .feature-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      /* Install Section */
+      #install {
+        padding: 100px 0;
+        background: linear-gradient(to bottom, var(--bg-body), #0a0a0a);
+      }
+
+      .install-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 3rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      @media (min-width: 640px) {
+        .install-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .install-card {
+        background: #0a0a0a;
+        border: 1px solid #1a1a1a;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s;
+      }
+
+      .install-card:hover {
+        border-color: #333;
+        background: #111;
+      }
+
+      .ide-icon {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+      }
+
+      .ide-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .ide-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .ide-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .install-link {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s;
+      }
+
+      .install-card:hover .install-link {
+        color: white;
+      }
+
+      /* Footer */
+      footer {
+        border-top: 1px solid #111;
+        padding: 4rem 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          flex-direction: row;
+          justify-content: space-between;
+        }
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 2rem;
+      }
+
+      .footer-links a:hover {
+        color: white;
+      }
+
+      /* SVG Icons */
+      .icon-svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container nav-inner">
+        <a href="#" class="logo">
+          <svg viewBox="75 75 550 460" fill="currentColor">
+            <path
+              d="M427.168243,457.442017 C425.819122,449.547241 423.122101,442.318848 423.698853,434.462524 C424.032776,429.914001 425.421570,427.767212 430.231689,427.856354 C439.058594,428.019928 447.892212,427.829376 456.722809,427.758575 C456.989899,427.756439 457.254486,427.444214 457.613678,427.217621 C457.368073,424.951355 455.354034,424.054169 453.930939,422.847504 C426.377777,399.484528 398.745331,376.215057 371.189789,352.854889 C338.934082,325.510132 306.717010,298.119751 274.524414,270.700714 C263.622467,261.415314 251.237717,256.257751 236.860092,258.389954 C224.588470,260.209808 214.408875,266.309784 206.747726,276.301849 C198.280991,287.344604 196.126556,300.166443 198.781265,313.162415 C201.634323,327.129364 210.490723,337.448029 223.204498,344.321960 C245.801773,356.539642 261.327179,374.634644 269.692413,399.149078 C276.152985,418.081879 276.479950,437.190247 271.224670,455.981201 C262.255310,488.052368 241.076370,509.933716 210.174667,521.633545 C191.969528,528.526184 172.825363,529.437866 153.804306,524.138000 C126.864838,516.631836 106.537056,500.387177 92.624367,476.312164 C85.404640,463.818909 82.311050,449.878174 80.875931,435.614410 C80.270752,429.599457 82.016541,427.910706 88.311928,427.888519 C109.477066,427.813904 130.643753,427.674530 151.806763,427.879456 C156.687561,427.926727 158.018784,426.315094 158.008911,421.582581 C157.912659,375.419159 158.026703,329.255280 158.064957,283.091553 C158.073288,273.046356 158.006531,273.179047 148.222565,270.409668 C130.560287,265.410309 116.306786,255.080124 104.342049,241.462097 C95.698990,231.624725 88.901611,220.410675 85.384003,207.892380 C81.355713,193.556671 79.421127,179.007889 81.986130,163.705536 C86.019867,139.640930 97.013763,119.981712 115.270241,104.354942 C129.280640,92.362617 145.611206,85.652557 164.019913,82.359856 C182.126755,79.121147 198.950943,82.425873 215.142990,88.878105 C233.754211,96.294342 248.862305,108.983948 259.459839,126.259476 C268.245300,140.581024 274.225616,155.961258 274.186584,173.133392 C274.172791,179.207626 273.827942,179.456848 267.561615,179.422638 C256.399597,179.361694 245.237259,179.342056 234.075058,179.337830 C232.780487,179.337341 231.485855,179.543945 229.507782,179.712921 C231.162796,183.495758 234.324875,185.233521 236.816971,187.352783 C267.624573,213.551376 298.528259,239.637009 329.411530,265.746613 C359.791107,291.430359 390.169800,317.115234 420.559967,342.786438 C445.261963,363.652771 484.472687,355.710846 496.803162,324.932526 C505.321411,303.670074 500.016693,279.107697 476.978882,265.558533 C455.370453,252.850006 438.942017,236.040833 429.762634,212.732635 C426.329376,204.015015 424.026337,194.849915 423.668365,185.203110 C423.151154,171.264481 424.164307,157.627075 429.282501,144.593735 C436.765991,125.537285 448.635315,109.701973 465.656647,98.148033 C482.876007,86.459763 502.107361,79.962250 522.895142,81.012749 C554.479553,82.608826 580.287292,96.149918 599.078735,121.991783 C609.973450,136.974136 615.598267,153.941711 617.169556,172.332947 C617.695557,178.490234 616.431702,179.951859 609.929321,179.958038 C589.097534,179.977875 568.265686,179.954498 547.433899,179.947815 C540.135315,179.945480 540.114441,179.949387 540.114868,187.056870 C540.117493,234.387115 540.178101,281.717499 540.046021,329.047363 C540.034790,333.066040 541.167969,335.069885 545.111877,336.148163 C565.103394,341.613831 581.901733,352.234558 595.002258,368.336823 C603.768311,379.111511 609.942993,391.140839 613.692261,404.742493 C617.732727,419.400574 618.472900,433.930450 615.441162,448.591919 C610.010620,474.854095 595.976257,495.510254 573.712952,510.584015 C557.116211,521.821167 538.780334,527.883301 518.841675,527.022888 C484.786621,525.553284 457.754974,510.774841 438.717651,482.078827 C433.714264,474.536957 430.447113,466.222565 427.168243,457.442017z"
+            />
+          </svg>
+          Nexus
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#install">Install</a></li>
+        </ul>
+        <a href="#install" class="btn btn-primary btn-sm">Install Now</a>
+      </div>
+    </header>
+
+    <main>
+      <section id="hero">
+        <div class="glow"></div>
+        <div class="container text-center hero-content">
+          <h1>
+            OpenCode, <span style="white-space: nowrap">Claude Code</span>,
+            Codex<br /><span class="text-gradient">in a ChatGPT UI</span>
+          </h1>
+          <p class="subtitle">
+            Chat with Claude, OpenCode, and other ACP-compatible agents directly
+            in your editor. No context switching. No copy-pasting code.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#install" class="btn btn-primary">Install for VS Code</a>
+          </div>
+
+          <div class="vscode-window">
+            <div class="vscode-title-bar">
+              <div class="vscode-traffic-lights">
+                <span class="traffic-light close"></span>
+                <span class="traffic-light minimize"></span>
+                <span class="traffic-light maximize"></span>
+              </div>
+              <span>[Extension Development Host] automaker</span>
+            </div>
+            <div class="vscode-body">
+              <div class="vscode-activity-bar">
+                <div class="vscode-icon" title="Explorer">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zm-3 20.38h-12v-15H7v9.07L8.5 18h6v4.5zm6-6h-12v-15H16V6h4.5v10.5z"
+                    />
+                  </svg>
+                </div>
+                <div class="vscode-icon" title="Search">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M15.25 0a8.25 8.25 0 0 0-6.18 13.72L1 22.88l1.12 1.12 8.05-9.12A8.251 8.251 0 1 0 15.25.01V0zm0 15a6.75 6.75 0 1 1 0-13.5 6.75 6.75 0 0 1 0 13.5z"
+                    />
+                  </svg>
+                </div>
+                <div class="vscode-icon" title="Source Control">
+                  <span class="badge">3</span>
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M21.007 8.222A3.738 3.738 0 0 0 17.5 5.5a3.73 3.73 0 0 0-3.507 2.722 4.187 4.187 0 0 0-2.237 1.754 4.193 4.193 0 0 0-2.978-1.239V6.378a2.5 2.5 0 1 0-1.5 0v11.244a2.5 2.5 0 1 0 1.5 0V11.85a2.706 2.706 0 0 1 2.722 2.606v.642a2.5 2.5 0 1 0 1.5 0v-.642a4.14 4.14 0 0 0-.756-2.377 2.716 2.716 0 0 1 2.093-1.298v.642a2.5 2.5 0 1 0 1.5 0v-.679a2.25 2.25 0 0 1 2.17 2.108v2.393a2.5 2.5 0 1 0 1.5 0v-2.393a3.75 3.75 0 0 0-3.5-3.63zM6.5 4.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 17a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm5.5-6a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5.5-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm3.5 6.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                    />
+                  </svg>
+                </div>
+                <div class="vscode-icon" title="Extensions">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M13.5 1.5L15 0h7.5L24 1.5V9l-1.5 1.5H15L13.5 9V1.5zm1.5 0V9h7.5V1.5H15zM0 15L1.5 13.5H9L10.5 15v7.5L9 24H1.5L0 22.5V15zm1.5 0v7.5H9V15H1.5zm0-13.5L0 3v7.5L1.5 12h6.75L9 10.5V9h1.5V1.5H9V0H1.5zM9 9H1.5V1.5H9V9zm6 6L13.5 13.5h6.75L21 15v6.75L19.5 22.5h-4.5l-.75.75v.75h-1.5v-.75l-.75-.75V15zm1.5 0v6h4.5v-6H16.5z"
+                    />
+                  </svg>
+                </div>
+                <div class="vscode-icon" title="Chat">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                    />
+                  </svg>
+                </div>
+                <div class="vscode-icon active" title="Nexus">
+                  <svg viewBox="75 75 550 460" fill="currentColor">
+                    <path
+                      d="M427.168243,457.442017 C425.819122,449.547241 423.122101,442.318848 423.698853,434.462524 C424.032776,429.914001 425.421570,427.767212 430.231689,427.856354 C439.058594,428.019928 447.892212,427.829376 456.722809,427.758575 C456.989899,427.756439 457.254486,427.444214 457.613678,427.217621 C457.368073,424.951355 455.354034,424.054169 453.930939,422.847504 C426.377777,399.484528 398.745331,376.215057 371.189789,352.854889 C338.934082,325.510132 306.717010,298.119751 274.524414,270.700714 C263.622467,261.415314 251.237717,256.257751 236.860092,258.389954 C224.588470,260.209808 214.408875,266.309784 206.747726,276.301849 C198.280991,287.344604 196.126556,300.166443 198.781265,313.162415 C201.634323,327.129364 210.490723,337.448029 223.204498,344.321960 C245.801773,356.539642 261.327179,374.634644 269.692413,399.149078 C276.152985,418.081879 276.479950,437.190247 271.224670,455.981201 C262.255310,488.052368 241.076370,509.933716 210.174667,521.633545 C191.969528,528.526184 172.825363,529.437866 153.804306,524.138000 C126.864838,516.631836 106.537056,500.387177 92.624367,476.312164 C85.404640,463.818909 82.311050,449.878174 80.875931,435.614410 C80.270752,429.599457 82.016541,427.910706 88.311928,427.888519 C109.477066,427.813904 130.643753,427.674530 151.806763,427.879456 C156.687561,427.926727 158.018784,426.315094 158.008911,421.582581 C157.912659,375.419159 158.026703,329.255280 158.064957,283.091553 C158.073288,273.046356 158.006531,273.179047 148.222565,270.409668 C130.560287,265.410309 116.306786,255.080124 104.342049,241.462097 C95.698990,231.624725 88.901611,220.410675 85.384003,207.892380 C81.355713,193.556671 79.421127,179.007889 81.986130,163.705536 C86.019867,139.640930 97.013763,119.981712 115.270241,104.354942 C129.280640,92.362617 145.611206,85.652557 164.019913,82.359856 C182.126755,79.121147 198.950943,82.425873 215.142990,88.878105 C233.754211,96.294342 248.862305,108.983948 259.459839,126.259476 C268.245300,140.581024 274.225616,155.961258 274.186584,173.133392 C274.172791,179.207626 273.827942,179.456848 267.561615,179.422638 C256.399597,179.361694 245.237259,179.342056 234.075058,179.337830 C232.780487,179.337341 231.485855,179.543945 229.507782,179.712921 C231.162796,183.495758 234.324875,185.233521 236.816971,187.352783 C267.624573,213.551376 298.528259,239.637009 329.411530,265.746613 C359.791107,291.430359 390.169800,317.115234 420.559967,342.786438 C445.261963,363.652771 484.472687,355.710846 496.803162,324.932526 C505.321411,303.670074 500.016693,279.107697 476.978882,265.558533 C455.370453,252.850006 438.942017,236.040833 429.762634,212.732635 C426.329376,204.015015 424.026337,194.849915 423.668365,185.203110 C423.151154,171.264481 424.164307,157.627075 429.282501,144.593735 C436.765991,125.537285 448.635315,109.701973 465.656647,98.148033 C482.876007,86.459763 502.107361,79.962250 522.895142,81.012749 C554.479553,82.608826 580.287292,96.149918 599.078735,121.991783 C609.973450,136.974136 615.598267,153.941711 617.169556,172.332947 C617.695557,178.490234 616.431702,179.951859 609.929321,179.958038 C589.097534,179.977875 568.265686,179.954498 547.433899,179.947815 C540.135315,179.945480 540.114441,179.949387 540.114868,187.056870 C540.117493,234.387115 540.178101,281.717499 540.046021,329.047363 C540.034790,333.066040 541.167969,335.069885 545.111877,336.148163 C565.103394,341.613831 581.901733,352.234558 595.002258,368.336823 C603.768311,379.111511 609.942993,391.140839 613.692261,404.742493 C617.732727,419.400574 618.472900,433.930450 615.441162,448.591919 C610.010620,474.854095 595.976257,495.510254 573.712952,510.584015 C557.116211,521.821167 538.780334,527.883301 518.841675,527.022888 C484.786621,525.553284 457.754974,510.774841 438.717651,482.078827 C433.714264,474.536957 430.447113,466.222565 427.168243,457.442017z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div class="vscode-main-area">
+                <div class="nexus-tab-bar">
+                  <div class="nexus-tab">
+                    <svg viewBox="75 75 550 460" fill="currentColor">
+                      <path
+                        d="M427.168243,457.442017 C425.819122,449.547241 423.122101,442.318848 423.698853,434.462524 C424.032776,429.914001 425.421570,427.767212 430.231689,427.856354 C439.058594,428.019928 447.892212,427.829376 456.722809,427.758575 C456.989899,427.756439 457.254486,427.444214 457.613678,427.217621 C457.368073,424.951355 455.354034,424.054169 453.930939,422.847504 C426.377777,399.484528 398.745331,376.215057 371.189789,352.854889 C338.934082,325.510132 306.717010,298.119751 274.524414,270.700714 C263.622467,261.415314 251.237717,256.257751 236.860092,258.389954 C224.588470,260.209808 214.408875,266.309784 206.747726,276.301849 C198.280991,287.344604 196.126556,300.166443 198.781265,313.162415 C201.634323,327.129364 210.490723,337.448029 223.204498,344.321960 C245.801773,356.539642 261.327179,374.634644 269.692413,399.149078 C276.152985,418.081879 276.479950,437.190247 271.224670,455.981201 C262.255310,488.052368 241.076370,509.933716 210.174667,521.633545 C191.969528,528.526184 172.825363,529.437866 153.804306,524.138000 C126.864838,516.631836 106.537056,500.387177 92.624367,476.312164 C85.404640,463.818909 82.311050,449.878174 80.875931,435.614410 C80.270752,429.599457 82.016541,427.910706 88.311928,427.888519 C109.477066,427.813904 130.643753,427.674530 151.806763,427.879456 C156.687561,427.926727 158.018784,426.315094 158.008911,421.582581 C157.912659,375.419159 158.026703,329.255280 158.064957,283.091553 C158.073288,273.046356 158.006531,273.179047 148.222565,270.409668 C130.560287,265.410309 116.306786,255.080124 104.342049,241.462097 C95.698990,231.624725 88.901611,220.410675 85.384003,207.892380 C81.355713,193.556671 79.421127,179.007889 81.986130,163.705536 C86.019867,139.640930 97.013763,119.981712 115.270241,104.354942 C129.280640,92.362617 145.611206,85.652557 164.019913,82.359856 C182.126755,79.121147 198.950943,82.425873 215.142990,88.878105 C233.754211,96.294342 248.862305,108.983948 259.459839,126.259476 C268.245300,140.581024 274.225616,155.961258 274.186584,173.133392 C274.172791,179.207626 273.827942,179.456848 267.561615,179.422638 C256.399597,179.361694 245.237259,179.342056 234.075058,179.337830 C232.780487,179.337341 231.485855,179.543945 229.507782,179.712921 C231.162796,183.495758 234.324875,185.233521 236.816971,187.352783 C267.624573,213.551376 298.528259,239.637009 329.411530,265.746613 C359.791107,291.430359 390.169800,317.115234 420.559967,342.786438 C445.261963,363.652771 484.472687,355.710846 496.803162,324.932526 C505.321411,303.670074 500.016693,279.107697 476.978882,265.558533 C455.370453,252.850006 438.942017,236.040833 429.762634,212.732635 C426.329376,204.015015 424.026337,194.849915 423.668365,185.203110 C423.151154,171.264481 424.164307,157.627075 429.282501,144.593735 C436.765991,125.537285 448.635315,109.701973 465.656647,98.148033 C482.876007,86.459763 502.107361,79.962250 522.895142,81.012749 C554.479553,82.608826 580.287292,96.149918 599.078735,121.991783 C609.973450,136.974136 615.598267,153.941711 617.169556,172.332947 C617.695557,178.490234 616.431702,179.951859 609.929321,179.958038 C589.097534,179.977875 568.265686,179.954498 547.433899,179.947815 C540.135315,179.945480 540.114441,179.949387 540.114868,187.056870 C540.117493,234.387115 540.178101,281.717499 540.046021,329.047363 C540.034790,333.066040 541.167969,335.069885 545.111877,336.148163 C565.103394,341.613831 581.901733,352.234558 595.002258,368.336823 C603.768311,379.111511 609.942993,391.140839 613.692261,404.742493 C617.732727,419.400574 618.472900,433.930450 615.441162,448.591919 C610.010620,474.854095 595.976257,495.510254 573.712952,510.584015 C557.116211,521.821167 538.780334,527.883301 518.841675,527.022888 C484.786621,525.553284 457.754974,510.774841 438.717651,482.078827 C433.714264,474.536957 430.447113,466.222565 427.168243,457.442017z"
+                      />
+                    </svg>
+                    <span>Nexus Chat 2</span>
+                    <span class="nexus-tab-close">×</span>
+                  </div>
+                </div>
+                <div class="nexus-content">
+                  <div class="nexus-sidebar">
+                    <div class="nexus-sidebar-header">
+                      <div class="nexus-sidebar-logo">
+                        <svg viewBox="75 75 550 460" fill="currentColor">
+                          <path
+                            d="M427.168243,457.442017 C425.819122,449.547241 423.122101,442.318848 423.698853,434.462524 C424.032776,429.914001 425.421570,427.767212 430.231689,427.856354 C439.058594,428.019928 447.892212,427.829376 456.722809,427.758575 C456.989899,427.756439 457.254486,427.444214 457.613678,427.217621 C457.368073,424.951355 455.354034,424.054169 453.930939,422.847504 C426.377777,399.484528 398.745331,376.215057 371.189789,352.854889 C338.934082,325.510132 306.717010,298.119751 274.524414,270.700714 C263.622467,261.415314 251.237717,256.257751 236.860092,258.389954 C224.588470,260.209808 214.408875,266.309784 206.747726,276.301849 C198.280991,287.344604 196.126556,300.166443 198.781265,313.162415 C201.634323,327.129364 210.490723,337.448029 223.204498,344.321960 C245.801773,356.539642 261.327179,374.634644 269.692413,399.149078 C276.152985,418.081879 276.479950,437.190247 271.224670,455.981201 C262.255310,488.052368 241.076370,509.933716 210.174667,521.633545 C191.969528,528.526184 172.825363,529.437866 153.804306,524.138000 C126.864838,516.631836 106.537056,500.387177 92.624367,476.312164 C85.404640,463.818909 82.311050,449.878174 80.875931,435.614410 C80.270752,429.599457 82.016541,427.910706 88.311928,427.888519 C109.477066,427.813904 130.643753,427.674530 151.806763,427.879456 C156.687561,427.926727 158.018784,426.315094 158.008911,421.582581 C157.912659,375.419159 158.026703,329.255280 158.064957,283.091553 C158.073288,273.046356 158.006531,273.179047 148.222565,270.409668 C130.560287,265.410309 116.306786,255.080124 104.342049,241.462097 C95.698990,231.624725 88.901611,220.410675 85.384003,207.892380 C81.355713,193.556671 79.421127,179.007889 81.986130,163.705536 C86.019867,139.640930 97.013763,119.981712 115.270241,104.354942 C129.280640,92.362617 145.611206,85.652557 164.019913,82.359856 C182.126755,79.121147 198.950943,82.425873 215.142990,88.878105 C233.754211,96.294342 248.862305,108.983948 259.459839,126.259476 C268.245300,140.581024 274.225616,155.961258 274.186584,173.133392 C274.172791,179.207626 273.827942,179.456848 267.561615,179.422638 C256.399597,179.361694 245.237259,179.342056 234.075058,179.337830 C232.780487,179.337341 231.485855,179.543945 229.507782,179.712921 C231.162796,183.495758 234.324875,185.233521 236.816971,187.352783 C267.624573,213.551376 298.528259,239.637009 329.411530,265.746613 C359.791107,291.430359 390.169800,317.115234 420.559967,342.786438 C445.261963,363.652771 484.472687,355.710846 496.803162,324.932526 C505.321411,303.670074 500.016693,279.107697 476.978882,265.558533 C455.370453,252.850006 438.942017,236.040833 429.762634,212.732635 C426.329376,204.015015 424.026337,194.849915 423.668365,185.203110 C423.151154,171.264481 424.164307,157.627075 429.282501,144.593735 C436.765991,125.537285 448.635315,109.701973 465.656647,98.148033 C482.876007,86.459763 502.107361,79.962250 522.895142,81.012749 C554.479553,82.608826 580.287292,96.149918 599.078735,121.991783 C609.973450,136.974136 615.598267,153.941711 617.169556,172.332947 C617.695557,178.490234 616.431702,179.951859 609.929321,179.958038 C589.097534,179.977875 568.265686,179.954498 547.433899,179.947815 C540.135315,179.945480 540.114441,179.949387 540.114868,187.056870 C540.117493,234.387115 540.178101,281.717499 540.046021,329.047363 C540.034790,333.066040 541.167969,335.069885 545.111877,336.148163 C565.103394,341.613831 581.901733,352.234558 595.002258,368.336823 C603.768311,379.111511 609.942993,391.140839 613.692261,404.742493 C617.732727,419.400574 618.472900,433.930450 615.441162,448.591919 C610.010620,474.854095 595.976257,495.510254 573.712952,510.584015 C557.116211,521.821167 538.780334,527.883301 518.841675,527.022888 C484.786621,525.553284 457.754974,510.774841 438.717651,482.078827 C433.714264,474.536957 430.447113,466.222565 427.168243,457.442017z"
+                          />
+                        </svg>
+                        <span>Nexus</span>
+                      </div>
+                      <button class="nexus-sidebar-collapse">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          width="16"
+                          height="16"
+                        >
+                          <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
+                    <button class="nexus-new-chat">
+                      <svg viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      New Chat
+                    </button>
+                    <div class="nexus-sessions">
+                      <div class="nexus-agent-group">CODEX CLI</div>
+                      <div class="nexus-session active">
+                        <span>hi who are you?</span>
+                        <span class="nexus-session-time">오후 03:57</span>
+                      </div>
+                      <div class="nexus-agent-group">CLAUDE CODE</div>
+                      <div class="nexus-session">
+                        <span>who are you?</span>
+                        <span class="nexus-session-time">오후 03:58</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="nexus-chat">
+                    <div class="nexus-chat-status">
+                      Switched to codex. Connecting...
+                    </div>
+                    <div class="nexus-messages">
+                      <div class="nexus-message user">
+                        <div class="nexus-bubble">hi who are you?</div>
+                      </div>
+                      <div class="nexus-message assistant">
+                        <div class="nexus-bubble">
+                          <p>
+                            Hi! I'm Codex, a coding assistant running in your
+                            CLI. I can read and edit files in this repo (with
+                            your approval when required), run commands, and help
+                            with coding tasks. What do you want to work on?
+                          </p>
+                          <button class="nexus-copy-btn">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                              />
+                              <path
+                                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                              />
+                            </svg>
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="nexus-input-area">
+                      <div class="nexus-input-wrapper">
+                        <div class="nexus-input">
+                          <div class="nexus-input-header">
+                            <span class="nexus-input-dot"></span>
+                            <span class="nexus-input-agent">Codex CLI</span>
+                            <span class="nexus-input-mode">Read Only</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="nexus-input-field"
+                            placeholder="Send a message..."
+                            readonly
+                          />
+                          <div class="nexus-input-actions">
+                            <div class="nexus-input-left">
+                              <div class="settings-dropdown-wrapper">
+                                <button
+                                  class="nexus-action-btn"
+                                  id="settings-btn"
+                                >
+                                  <span class="green-dot"></span>
+                                  <svg viewBox="0 0 24 24" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path
+                                      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                                    />
+                                  </svg>
+                                </button>
+                                <div
+                                  class="settings-dropdown"
+                                  id="settings-dropdown"
+                                >
+                                  <div class="dropdown-section">
+                                    <div class="dropdown-row">
+                                      <span class="status-dot connected"></span>
+                                      <span class="status-text">Connected</span>
+                                    </div>
+                                  </div>
+                                  <div class="dropdown-section">
+                                    <label class="dropdown-label">Agent</label>
+                                    <select
+                                      class="dropdown-select"
+                                      id="agent-select"
+                                    >
+                                      <option value="codex">Codex CLI</option>
+                                      <option value="claude">
+                                        Claude Code
+                                      </option>
+                                      <option value="opencode">OpenCode</option>
+                                    </select>
+                                  </div>
+                                  <div class="dropdown-section">
+                                    <label class="dropdown-label">Mode</label>
+                                    <select
+                                      class="dropdown-select"
+                                      id="mode-select"
+                                    >
+                                      <option value="readonly">
+                                        Read Only
+                                      </option>
+                                      <option value="edit">Edit</option>
+                                      <option value="auto">Auto</option>
+                                    </select>
+                                  </div>
+                                  <div class="dropdown-section">
+                                    <label class="dropdown-label">Model</label>
+                                    <select
+                                      class="dropdown-select"
+                                      id="model-select"
+                                    >
+                                      <option value="gpt-4o">gpt-4o</option>
+                                      <option value="gpt-4o-mini">
+                                        gpt-4o-mini
+                                      </option>
+                                      <option value="o3">o3</option>
+                                      <option value="o4-mini">o4-mini</option>
+                                      <option value="claude-sonnet">
+                                        claude-sonnet-4-20250514
+                                      </option>
+                                      <option value="claude-opus">
+                                        claude-opus-4-20250514
+                                      </option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="nexus-action-btn">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                  <path
+                                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                                  />
+                                </svg>
+                              </button>
+                              <button class="nexus-action-btn">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                  <rect
+                                    x="3"
+                                    y="3"
+                                    width="18"
+                                    height="18"
+                                    rx="2"
+                                    ry="2"
+                                  />
+                                  <circle cx="8.5" cy="8.5" r="1.5" />
+                                  <polyline points="21 15 16 10 5 21" />
+                                </svg>
+                              </button>
+                            </div>
+                            <button class="nexus-send-btn">
+                              <svg
+                                viewBox="0 0 24 24"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="m5 12 7-7 7 7" />
+                                <path d="M12 19V5" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="vscode-status-bar">
+              <div class="status-bar-left">
+                <span class="status-item">✓ Nexus</span>
+                <span class="status-item">⊙ 0 ⚠ 0</span>
+                <span class="status-item">Live Share</span>
+              </div>
+              <div class="status-bar-right">
+                <span class="status-item">Claude</span>
+                <span class="status-item">Go Live</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="works-with">
+        <div class="container text-center">
+          <p class="works-with-label">Works with your favorite AI agents</p>
+          <div class="logo-grid">
+            <a
+              href="https://opencode.ai"
+              target="_blank"
+              class="agent-logo opencode"
+            >
+              <svg
+                width="234"
+                height="42"
+                viewBox="0 0 234 42"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M18 30H6V18H18V30Z" fill="#4B4646" />
+                <path
+                  d="M18 12H6V30H18V12ZM24 36H0V6H24V36Z"
+                  fill="currentColor"
+                />
+                <path d="M48 30H36V18H48V30Z" fill="#4B4646" />
+                <path
+                  d="M36 30H48V12H36V30ZM54 36H36V42H30V6H54V36Z"
+                  fill="currentColor"
+                />
+                <path d="M84 24V30H66V24H84Z" fill="#4B4646" />
+                <path
+                  d="M84 24H66V30H84V36H60V6H84V24ZM66 18H78V12H66V18Z"
+                  fill="currentColor"
+                />
+                <path d="M108 36H96V18H108V36Z" fill="#4B4646" />
+                <path
+                  d="M108 12H96V36H90V6H108V12ZM114 36H108V12H114V36Z"
+                  fill="currentColor"
+                />
+                <path d="M144 30H126V18H144V30Z" fill="#4B4646" />
+                <path
+                  d="M144 12H126V30H144V36H120V6H144V12Z"
+                  fill="currentColor"
+                />
+                <path d="M168 30H156V18H168V30Z" fill="#4B4646" />
+                <path
+                  d="M168 12H156V30H168V12ZM174 36H150V6H174V36Z"
+                  fill="currentColor"
+                />
+                <path d="M198 30H186V18H198V30Z" fill="#4B4646" />
+                <path
+                  d="M198 12H186V30H198V12ZM204 36H180V6H198V0H204V36Z"
+                  fill="currentColor"
+                />
+                <path d="M234 24V30H216V24H234Z" fill="#4B4646" />
+                <path
+                  d="M216 12V18H228V12H216ZM234 24H216V30H234V36H210V6H234V24Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </a>
+            <a href="https://claude.ai/code" target="_blank" class="agent-logo">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"
+                />
+              </svg>
+              Claude
+            </a>
+            <a
+              href="https://github.com/google-gemini/gemini-cli"
+              target="_blank"
+              class="agent-logo"
+            >
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 8.016A8.522 8.522 0 008.016 16h-.032A8.521 8.521 0 000 8.016v-.032A8.521 8.521 0 007.984 0h.032A8.522 8.522 0 0016 7.984v.032z"
+                  fill="url(#gemini-grad)"
+                />
+                <defs>
+                  <radialGradient
+                    id="gemini-grad"
+                    cx="0"
+                    cy="0"
+                    r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="matrix(16.1326 5.4553 -43.70045 129.2322 1.588 6.503)"
+                  >
+                    <stop offset=".067" stop-color="#9168C0" />
+                    <stop offset=".343" stop-color="#5684D1" />
+                    <stop offset=".672" stop-color="#1BA1E3" />
+                  </radialGradient>
+                </defs>
+              </svg>
+              Gemini
+            </a>
+            <a
+              href="https://openai.com/codex"
+              target="_blank"
+              class="agent-logo"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"
+                />
+              </svg>
+              Codex
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="features">
+        <div class="container">
+          <div class="section-header">
+            <h2>Everything you need</h2>
+            <p class="subtitle">
+              Nexus bridges the gap between AI and your local development
+              environment.
+            </p>
+          </div>
+
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <h3 class="feature-title">Multi-Agent Support</h3>
+              <p class="feature-desc">
+                Switch seamlessly between different AI agents. Orchestrate
+                complex tasks with specialized assistants.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                  <path
+                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="feature-title">Native Chat Interface</h3>
+              <p class="feature-desc">
+                A first-class chat experience built directly into VS Code.
+                Syntax highlighting, markdown support, and more.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                  <polygon
+                    points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+                  ></polygon>
+                </svg>
+              </div>
+              <h3 class="feature-title">Real-time Streaming</h3>
+              <p class="feature-desc">
+                Watch the AI think and write code in real-time. Low latency
+                streaming for instant feedback.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <h3 class="feature-title">Tool Visibility</h3>
+              <p class="feature-desc">
+                See exactly what tools the AI is using. Monitor file reads,
+                command executions, and API calls.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <h3 class="feature-title">Session Management</h3>
+              <p class="feature-desc">
+                Save, load, and manage your conversation history. Resume complex
+                tasks right where you left off.
+              </p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                  <path
+                    d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+                  ></path>
+                  <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
+              </div>
+              <h3 class="feature-title">File Context</h3>
+              <p class="feature-desc">
+                Intelligent context management. Automatically attach relevant
+                files and code snippets to your query.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="install">
+        <div class="container">
+          <div class="section-header">
+            <h2>Get Started</h2>
+            <p class="subtitle">Available for your favorite editors.</p>
+          </div>
+
+          <div class="install-grid">
+            <a
+              href="vscode:extension/cosmosjeon.nexus-acp"
+              class="install-card"
+            >
+              <div class="ide-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+                  <mask
+                    id="vscode-mask"
+                    width="128"
+                    height="128"
+                    x="0"
+                    y="0"
+                    maskUnits="userSpaceOnUse"
+                    style="mask-type: alpha"
+                  >
+                    <path
+                      fill="#fff"
+                      fill-rule="evenodd"
+                      d="M90.767 127.126a7.968 7.968 0 0 0 6.35-.244l26.353-12.681a8 8 0 0 0 4.53-7.209V21.009a8 8 0 0 0-4.53-7.21L97.117 1.12a7.97 7.97 0 0 0-9.093 1.548l-50.45 46.026L15.6 32.013a5.328 5.328 0 0 0-6.807.302l-7.048 6.411a5.335 5.335 0 0 0-.006 7.888L20.796 64 1.74 81.387a5.336 5.336 0 0 0 .006 7.887l7.048 6.411a5.327 5.327 0 0 0 6.807.303l21.974-16.68 50.45 46.025a7.96 7.96 0 0 0 2.743 1.793Zm5.252-92.183L57.74 64l38.28 29.058V34.943Z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </mask>
+                  <g mask="url(#vscode-mask)">
+                    <path
+                      fill="#0065A9"
+                      d="M123.471 13.82 97.097 1.12A7.973 7.973 0 0 0 88 2.668L1.662 81.387a5.333 5.333 0 0 0 .006 7.887l7.052 6.411a5.333 5.333 0 0 0 6.811.303l103.971-78.875c3.488-2.646 8.498-.158 8.498 4.22v-.306a8.001 8.001 0 0 0-4.529-7.208Z"
+                    ></path>
+                    <g filter="url(#vscode-filter-1)">
+                      <path
+                        fill="#007ACC"
+                        d="m123.471 114.181-26.374 12.698A7.973 7.973 0 0 1 88 125.333L1.662 46.613a5.333 5.333 0 0 1 .006-7.887l7.052-6.411a5.333 5.333 0 0 1 6.811-.303l103.971 78.874c3.488 2.647 8.498.159 8.498-4.219v.306a8.001 8.001 0 0 1-4.529 7.208Z"
+                      ></path>
+                    </g>
+                    <g filter="url(#vscode-filter-2)">
+                      <path
+                        fill="#1F9CF0"
+                        d="M97.098 126.882A7.977 7.977 0 0 1 88 125.333c2.952 2.952 8 .861 8-3.314V5.98c0-4.175-5.048-6.266-8-3.313a7.977 7.977 0 0 1 9.098-1.549L123.467 13.8A8 8 0 0 1 128 21.01v85.982a8 8 0 0 1-4.533 7.21l-26.369 12.681Z"
+                      ></path>
+                    </g>
+                    <path
+                      fill="url(#vscode-gradient)"
+                      fill-rule="evenodd"
+                      d="M90.69 127.126a7.968 7.968 0 0 0 6.349-.244l26.353-12.681a8 8 0 0 0 4.53-7.21V21.009a8 8 0 0 0-4.53-7.21L97.039 1.12a7.97 7.97 0 0 0-9.093 1.548l-50.45 46.026-21.974-16.68a5.328 5.328 0 0 0-6.807.302l-7.048 6.411a5.336 5.336 0 0 0-.006 7.888L20.718 64 1.662 81.386a5.335 5.335 0 0 0 .006 7.888l7.048 6.411a5.328 5.328 0 0 0 6.807.303l21.975-16.681 50.45 46.026a7.959 7.959 0 0 0 2.742 1.793Zm5.252-92.184L57.662 64l38.28 29.057V34.943Z"
+                      clip-rule="evenodd"
+                      opacity="0.25"
+                      style="mix-blend-mode: overlay"
+                    ></path>
+                  </g>
+                  <defs>
+                    <filter
+                      id="vscode-filter-1"
+                      width="144.744"
+                      height="113.408"
+                      x="-8.41115"
+                      y="22.5944"
+                      color-interpolation-filters="sRGB"
+                      filterUnits="userSpaceOnUse"
+                    >
+                      <feFlood
+                        flood-opacity="0"
+                        result="BackgroundImageFix"
+                      ></feFlood>
+                      <feColorMatrix
+                        in="SourceAlpha"
+                        result="hardAlpha"
+                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      ></feColorMatrix>
+                      <feOffset></feOffset>
+                      <feGaussianBlur stdDeviation="4.16667"></feGaussianBlur>
+                      <feColorMatrix
+                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                      ></feColorMatrix>
+                      <feBlend
+                        in2="BackgroundImageFix"
+                        mode="overlay"
+                        result="effect1_dropShadow"
+                      ></feBlend>
+                      <feBlend
+                        in="SourceGraphic"
+                        in2="effect1_dropShadow"
+                        result="shape"
+                      ></feBlend>
+                    </filter>
+                    <filter
+                      id="vscode-filter-2"
+                      width="56.6667"
+                      height="144.007"
+                      x="79.6667"
+                      y="-8.0035"
+                      color-interpolation-filters="sRGB"
+                      filterUnits="userSpaceOnUse"
+                    >
+                      <feFlood
+                        flood-opacity="0"
+                        result="BackgroundImageFix"
+                      ></feFlood>
+                      <feColorMatrix
+                        in="SourceAlpha"
+                        result="hardAlpha"
+                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      ></feColorMatrix>
+                      <feOffset></feOffset>
+                      <feGaussianBlur stdDeviation="4.16667"></feGaussianBlur>
+                      <feColorMatrix
+                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                      ></feColorMatrix>
+                      <feBlend
+                        in2="BackgroundImageFix"
+                        mode="overlay"
+                        result="effect1_dropShadow"
+                      ></feBlend>
+                      <feBlend
+                        in="SourceGraphic"
+                        in2="effect1_dropShadow"
+                        result="shape"
+                      ></feBlend>
+                    </filter>
+                    <linearGradient
+                      id="vscode-gradient"
+                      x1="63.9222"
+                      x2="63.9222"
+                      y1="0.329902"
+                      y2="127.67"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#fff"></stop>
+                      <stop
+                        offset="1"
+                        stop-color="#fff"
+                        stop-opacity="0"
+                      ></stop>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="ide-info">
+                <div class="ide-name">For VS Code</div>
+                <span class="install-link">Install extension →</span>
+              </div>
+            </a>
+
+            <a
+              href="https://open-vsx.org/extension/cosmosjeon/nexus-acp"
+              target="_blank"
+              class="install-card"
+            >
+              <div class="ide-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"
+                    fill="white"
+                  />
+                </svg>
+              </div>
+              <div class="ide-info">
+                <div class="ide-name">For Cursor</div>
+                <span class="install-link">Install extension →</span>
+              </div>
+            </a>
+
+            <a
+              href="https://open-vsx.org/extension/cosmosjeon/nexus-acp"
+              target="_blank"
+              class="install-card"
+            >
+              <div class="ide-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112">
+                  <defs>
+                    <filter
+                      id="filter0_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter1_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter2_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter3_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter4_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter5_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter6_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter7_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter8_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter9_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                    <filter
+                      id="filter10_f_6001_463"
+                      filterUnits="userSpaceOnUse"
+                      color-interpolation-filters="sRGB"
+                    >
+                      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+                    </filter>
+                  </defs>
+                  <mask
+                    id="mask0_6001_463"
+                    maskUnits="userSpaceOnUse"
+                    x="13"
+                    y="18"
+                    width="85"
+                    height="78"
+                    style="mask-type: alpha"
+                  >
+                    <path
+                      d="M89.6992 93.695C94.3659 97.195 101.366 94.8617 94.9492 88.445C75.6992 69.7783 79.7825 18.445 55.8659 18.445C31.9492 18.445 36.0325 69.7783 16.7825 88.445C9.78251 95.445 17.3658 97.195 22.0325 93.695C40.1159 81.445 38.9492 59.8617 55.8659 59.8617C72.7825 59.8617 71.6159 81.445 89.6992 93.695Z"
+                      fill="black"
+                    ></path>
+                  </mask>
+                  <g mask="url(#mask0_6001_463)">
+                    <g filter="url(#filter0_f_6001_463)">
+                      <ellipse
+                        cx="22.7873"
+                        cy="26.8098"
+                        rx="22.7873"
+                        ry="26.8098"
+                        transform="matrix(-0.112784 0.99362 -0.99362 -0.112781 66.2473 -15.5344)"
+                        fill="#FFE432"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter1_f_6001_463)">
+                      <ellipse
+                        cx="96.491"
+                        cy="35.1231"
+                        rx="29.5007"
+                        ry="30.1492"
+                        transform="rotate(76.9243 96.491 35.1231)"
+                        fill="#FC413D"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter2_f_6001_463)">
+                      <ellipse
+                        cx="9.02988"
+                        cy="41.6647"
+                        rx="30.832"
+                        ry="39.9417"
+                        transform="rotate(74.1257 9.02988 41.6647)"
+                        fill="#00B95C"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter3_f_6001_463)">
+                      <ellipse
+                        cx="9.02988"
+                        cy="41.6647"
+                        rx="30.832"
+                        ry="39.9417"
+                        transform="rotate(74.1257 9.02988 41.6647)"
+                        fill="#00B95C"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter4_f_6001_463)">
+                      <ellipse
+                        cx="11.2212"
+                        cy="42.8915"
+                        rx="30.22"
+                        ry="33.2695"
+                        transform="rotate(45.6065 11.2212 42.8915)"
+                        fill="#00B95C"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter5_f_6001_463)">
+                      <ellipse
+                        cx="75.7546"
+                        cy="104.822"
+                        rx="29.0177"
+                        ry="27.943"
+                        transform="rotate(76.9243 75.7546 104.822)"
+                        fill="#3186FF"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter6_f_6001_463)">
+                      <ellipse
+                        cx="33.5661"
+                        cy="35.4043"
+                        rx="33.5661"
+                        ry="35.4043"
+                        transform="matrix(-0.409539 0.912293 -0.912294 -0.409537 101.25 -15.1674)"
+                        fill="#FBBC04"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter7_f_6001_463)">
+                      <path
+                        d="M2.56802 149.695C-15.8116 142.48 15.5987 83.1163 23.4093 63.2203C31.22 43.3244 52.4514 33.0447 70.831 40.26C89.2107 47.4753 110.996 87.2162 103.185 107.112C95.3742 127.008 20.9477 156.91 2.56802 149.695Z"
+                        fill="#3186FF"
+                      ></path>
+                    </g>
+                    <g filter="url(#filter8_f_6001_463)">
+                      <path
+                        d="M113.934 75.8079C109.013 81.5509 96.1724 78.6224 85.253 69.2667C74.3335 59.911 69.4704 47.6711 74.391 41.928C79.3116 36.185 92.1525 39.1136 103.072 48.4692C113.991 57.8249 118.855 70.0648 113.934 75.8079Z"
+                        fill="#749BFF"
+                      ></path>
+                    </g>
+                    <g filter="url(#filter9_f_6001_463)">
+                      <ellipse
+                        cx="92.611"
+                        cy="23.7962"
+                        rx="44.2411"
+                        ry="27.5016"
+                        transform="rotate(34.0763 92.611 23.7962)"
+                        fill="#FC413D"
+                      ></ellipse>
+                    </g>
+                    <g filter="url(#filter10_f_6001_463)">
+                      <ellipse
+                        cx="23.4949"
+                        cy="29.5887"
+                        rx="23.7071"
+                        ry="13.7869"
+                        transform="rotate(112.516 23.4949 29.5887)"
+                        fill="#FFEE48"
+                      ></ellipse>
+                    </g>
+                  </g>
+                </svg>
+              </div>
+              <div class="ide-info">
+                <div class="ide-name">For Antigravity</div>
+                <span class="install-link">Install extension →</span>
+              </div>
+            </a>
+
+            <a
+              href="https://open-vsx.org/extension/cosmosjeon/nexus-acp"
+              target="_blank"
+              class="install-card"
+            >
+              <div class="ide-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 232 137"
+                  fill="none"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M229.812 0.101852H227.602C215.97 0.0837402 206.53 9.50557 206.53 21.1379V68.1836C206.53 77.5783 198.766 85.1883 189.525 85.1883C184.035 85.1883 178.554 82.4251 175.302 77.7867L127.25 9.16132C123.264 3.46292 116.778 0.0656128 109.757 0.0656128C98.8036 0.0656128 88.947 9.37874 88.947 20.8752V68.1927C88.947 77.5874 81.2464 85.1973 71.9424 85.1973C66.4342 85.1973 60.9623 82.4342 57.71 77.7957L3.94208 1.0078C2.72815 -0.722549 0.0012207 0.129028 0.0012207 2.24895V43.2792C0.0012207 45.3538 0.635376 47.3651 1.8222 49.0682L54.7294 124.633C57.8549 129.099 62.4662 132.415 67.7841 133.62C81.0924 136.646 93.3408 126.4 93.3408 113.345V66.0547C93.3408 56.66 100.951 49.0501 110.345 49.0501H110.373C116.035 49.0501 121.344 51.8132 124.596 56.4516L172.647 125.068C176.642 130.775 182.794 134.164 190.132 134.164C201.33 134.164 210.923 124.841 210.923 113.354V66.0456C210.923 56.651 218.533 49.041 227.928 49.041H229.803C230.981 49.041 231.932 48.0898 231.932 46.9121V2.22177C231.932 1.04404 230.981 0.0927887 229.803 0.0927887L229.812 0.101852Z"
+                    fill="white"
+                  ></path>
+                </svg>
+              </div>
+              <div class="ide-info">
+                <div class="ide-name">For Windsurf</div>
+                <span class="install-link">Install extension →</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="logo" style="font-size: 1rem">
+            <svg
+              viewBox="75 75 550 460"
+              fill="currentColor"
+              style="width: 24px; height: 24px"
+            >
+              <path
+                d="M427.168243,457.442017 C425.819122,449.547241 423.122101,442.318848 423.698853,434.462524 C424.032776,429.914001 425.421570,427.767212 430.231689,427.856354 C439.058594,428.019928 447.892212,427.829376 456.722809,427.758575 C456.989899,427.756439 457.254486,427.444214 457.613678,427.217621 C457.368073,424.951355 455.354034,424.054169 453.930939,422.847504 C426.377777,399.484528 398.745331,376.215057 371.189789,352.854889 C338.934082,325.510132 306.717010,298.119751 274.524414,270.700714 C263.622467,261.415314 251.237717,256.257751 236.860092,258.389954 C224.588470,260.209808 214.408875,266.309784 206.747726,276.301849 C198.280991,287.344604 196.126556,300.166443 198.781265,313.162415 C201.634323,327.129364 210.490723,337.448029 223.204498,344.321960 C245.801773,356.539642 261.327179,374.634644 269.692413,399.149078 C276.152985,418.081879 276.479950,437.190247 271.224670,455.981201 C262.255310,488.052368 241.076370,509.933716 210.174667,521.633545 C191.969528,528.526184 172.825363,529.437866 153.804306,524.138000 C126.864838,516.631836 106.537056,500.387177 92.624367,476.312164 C85.404640,463.818909 82.311050,449.878174 80.875931,435.614410 C80.270752,429.599457 82.016541,427.910706 88.311928,427.888519 C109.477066,427.813904 130.643753,427.674530 151.806763,427.879456 C156.687561,427.926727 158.018784,426.315094 158.008911,421.582581 C157.912659,375.419159 158.026703,329.255280 158.064957,283.091553 C158.073288,273.046356 158.006531,273.179047 148.222565,270.409668 C130.560287,265.410309 116.306786,255.080124 104.342049,241.462097 C95.698990,231.624725 88.901611,220.410675 85.384003,207.892380 C81.355713,193.556671 79.421127,179.007889 81.986130,163.705536 C86.019867,139.640930 97.013763,119.981712 115.270241,104.354942 C129.280640,92.362617 145.611206,85.652557 164.019913,82.359856 C182.126755,79.121147 198.950943,82.425873 215.142990,88.878105 C233.754211,96.294342 248.862305,108.983948 259.459839,126.259476 C268.245300,140.581024 274.225616,155.961258 274.186584,173.133392 C274.172791,179.207626 273.827942,179.456848 267.561615,179.422638 C256.399597,179.361694 245.237259,179.342056 234.075058,179.337830 C232.780487,179.337341 231.485855,179.543945 229.507782,179.712921 C231.162796,183.495758 234.324875,185.233521 236.816971,187.352783 C267.624573,213.551376 298.528259,239.637009 329.411530,265.746613 C359.791107,291.430359 390.169800,317.115234 420.559967,342.786438 C445.261963,363.652771 484.472687,355.710846 496.803162,324.932526 C505.321411,303.670074 500.016693,279.107697 476.978882,265.558533 C455.370453,252.850006 438.942017,236.040833 429.762634,212.732635 C426.329376,204.015015 424.026337,194.849915 423.668365,185.203110 C423.151154,171.264481 424.164307,157.627075 429.282501,144.593735 C436.765991,125.537285 448.635315,109.701973 465.656647,98.148033 C482.876007,86.459763 502.107361,79.962250 522.895142,81.012749 C554.479553,82.608826 580.287292,96.149918 599.078735,121.991783 C609.973450,136.974136 615.598267,153.941711 617.169556,172.332947 C617.695557,178.490234 616.431702,179.951859 609.929321,179.958038 C589.097534,179.977875 568.265686,179.954498 547.433899,179.947815 C540.135315,179.945480 540.114441,179.949387 540.114868,187.056870 C540.117493,234.387115 540.178101,281.717499 540.046021,329.047363 C540.034790,333.066040 541.167969,335.069885 545.111877,336.148163 C565.103394,341.613831 581.901733,352.234558 595.002258,368.336823 C603.768311,379.111511 609.942993,391.140839 613.692261,404.742493 C617.732727,419.400574 618.472900,433.930450 615.441162,448.591919 C610.010620,474.854095 595.976257,495.510254 573.712952,510.584015 C557.116211,521.821167 538.780334,527.883301 518.841675,527.022888 C484.786621,525.553284 457.754974,510.774841 438.717651,482.078827 C433.714264,474.536957 430.447113,466.222565 427.168243,457.442017z"
+              />
+            </svg>
+            Nexus
+          </div>
+          <div class="footer-links">
+            <a
+              href="https://www.linkedin.com/in/dohyun-jeon-161976312/"
+              target="_blank"
+              >LinkedIn</a
+            >
+            <a href="https://www.threads.com/@homer_vibe" target="_blank"
+              >Threads</a
+            >
+          </div>
+          <div class="copyright">© 2026 Nexus. All rights reserved.</div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Settings Dropdown Toggle
+      document.addEventListener("DOMContentLoaded", function () {
+        const settingsBtn = document.getElementById("settings-btn");
+        const settingsDropdown = document.getElementById("settings-dropdown");
+        const agentSelect = document.getElementById("agent-select");
+        const modeSelect = document.getElementById("mode-select");
+        const modelSelect = document.getElementById("model-select");
+        const agentDisplay = document.querySelector(".nexus-input-agent");
+        const modeDisplay = document.querySelector(".nexus-input-mode");
+
+        // Toggle dropdown
+        settingsBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          settingsDropdown.classList.toggle("show");
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+          if (
+            !settingsDropdown.contains(e.target) &&
+            e.target !== settingsBtn
+          ) {
+            settingsDropdown.classList.remove("show");
+          }
+        });
+
+        // Update agent display
+        agentSelect.addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex];
+          agentDisplay.textContent = selectedOption.text;
+        });
+
+        // Update mode display
+        modeSelect.addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex];
+          modeDisplay.textContent = selectedOption.text;
+        });
+
+        // Model change (just for demo - shows selected model)
+        modelSelect.addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex];
+          console.log("Model changed to:", selectedOption.text);
+        });
+
+        // Prevent dropdown from closing when interacting with selects
+        settingsDropdown.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      });
+    </script>
+  </body>
+</html>

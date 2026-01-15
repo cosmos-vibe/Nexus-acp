@@ -1,0 +1,39 @@
+# Bug Fix Workflow Configuration
+name: "bug-fix"
+description: "Adaptive bug diagnosis and fix workflow - 3-5 steps based on complexity"
+author: "QDM Team"
+version: "1.0.0"
+
+# Config reference (bmb standard)
+config_source: "{project-root}/{qdm_root}/config.yaml"
+output_folder: "{config_source}:output_folder"
+user_name: "{config_source}:user_name"
+communication_language: "{config_source}:communication_language"
+skill_level: "{config_source}:skill_level"
+sdd_root: "{config_source}:sdd_root"
+date: system-generated
+
+# Module paths
+installed_path: "{project-root}/{qdm_root}/workflows/bug-fix"
+template: "{installed_path}/template.md"
+instructions: "{installed_path}/instructions.md"
+steps_path: "{installed_path}/steps"
+
+# Output settings
+default_output_folder: "{sdd_root}/bug-{{bug_name}}"
+default_output_file: "{default_output_folder}/status.md"
+
+# Templates
+template_meta: "{project-root}/{qdm_root}/templates/bug/meta.yaml.template"
+template_status: "{project-root}/{qdm_root}/templates/bug/status.md.template"
+
+# Workflow settings
+standalone: true
+adaptive: true
+paths:
+  simple:
+    steps: 3
+    files: ["step-01-assess.md", "step-02a-simple.md"]
+  complex:
+    steps: 5
+    files: ["step-01-assess.md", "step-02b-investigate.md", "step-03-root-cause.md", "step-04-plan-fix.md", "step-05-execute-fix.md"]

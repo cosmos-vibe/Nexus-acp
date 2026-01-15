@@ -1,0 +1,86 @@
+---
+title: "{{title}}"
+created: "{{date}}"
+updated: "{{date}}"
+status: draft  # draft | review | approved
+author: "{{user_name}}"
+---
+
+# Spec: {{title}}
+
+## 1. Overview
+
+### Summary
+{{summary}}
+
+### Purpose
+{{purpose}}
+
+### Target Users
+{{target_users}}
+
+---
+
+## 2. Research
+
+### Problem Statement
+{{problem_statement}}
+
+### Similar Solutions
+{{similar_solutions}}
+
+### Key Decisions
+{{key_decisions}}
+
+---
+
+## 3. Requirements
+
+### Functional Requirements
+
+| ID | Description | Input | Output | Priority |
+|----|-------------|-------|--------|----------|
+| FR-1 | {{fr_1_desc}} | {{fr_1_input}} | {{fr_1_output}} | {{fr_1_priority}} |
+| FR-2 | {{fr_2_desc}} | {{fr_2_input}} | {{fr_2_output}} | {{fr_2_priority}} |
+
+### Non-Functional Requirements
+
+| ID | Category | Description | Metric |
+|----|----------|-------------|--------|
+| NFR-1 | {{nfr_1_category}} | {{nfr_1_desc}} | {{nfr_1_metric}} |
+| NFR-2 | {{nfr_2_category}} | {{nfr_2_desc}} | {{nfr_2_metric}} |
+
+---
+
+## 4. Success Criteria
+
+### Acceptance Criteria
+
+- [ ] AC-1: {{ac_1}}
+- [ ] AC-2: {{ac_2}}
+- [ ] AC-3: {{ac_3}}
+
+### Metrics
+
+| Metric | Target | Measurement Method |
+|--------|--------|-------------------|
+| {{metric_1}} | {{target_1}} | {{method_1}} |
+
+---
+
+## 5. References
+
+### Related Code
+
+| File | Relevance |
+|------|-----------|
+| {{file_1}} | {{relevance_1}} |
+
+### Dependencies
+
+- Internal: {{internal_deps}}
+- External: {{external_deps}}
+
+### Documentation
+
+- {{doc_links}}

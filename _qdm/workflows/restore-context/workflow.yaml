@@ -1,0 +1,23 @@
+# Restore Context Workflow Configuration
+name: "restore-context"
+description: "Context restoration workflow - resume existing work with full context"
+author: "QDM Team"
+version: "1.0.0"
+
+# Config reference (bmb standard)
+config_source: "{project-root}/{qdm_root}/config.yaml"
+output_folder: "{config_source}:output_folder"
+user_name: "{config_source}:user_name"
+communication_language: "{config_source}:communication_language"
+skill_level: "{config_source}:skill_level"
+sdd_root: "{config_source}:sdd_root"
+date: system-generated
+
+# Module paths
+installed_path: "{project-root}/{qdm_root}/workflows/restore-context"
+instructions: "{installed_path}/instructions.md"
+steps_path: "{installed_path}/steps"
+
+# Workflow settings
+standalone: true
+read_only: true  # This workflow doesn't create new files
