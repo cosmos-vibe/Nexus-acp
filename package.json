@@ -2,7 +2,8 @@
   "name": "nexus-acp",
   "displayName": "Nexus ACP",
   "description": "AI coding agents in VS Code via Agent Client Protocol (ACP). Chat with Claude, OpenCode, and other ACP-compatible agents directly in your editor.",
-  "version": "0.1.5",
+  "version": "0.1.6",
+  "license": "Apache-2.0",
   "publisher": "cosmosjeon",
   "icon": "assets/icon.png",
   "preview": true,
@@ -14,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmosjeon/nexus-acp"
+    "url": "https://github.com/cosmos-vibe/Nexus-acp.git"
   },
   "engines": {
     "vscode": "^1.74.0",
