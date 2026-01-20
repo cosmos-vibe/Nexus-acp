@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0 (2026-01-20)
+
+
+### Features
+
+* **landing:** add GitHub button and footer link ([b58e4a6](https://github.com/cosmos-vibe/Nexus-acp/commit/b58e4a6eae37f5f2c491b2f3632e6b5c72230d31))
+
+
+### Bug Fixes
+
+* include stderr output in agent connection error message ([58cf16c](https://github.com/cosmos-vibe/Nexus-acp/commit/58cf16cbd14d4d6308a63fe18804a955f4a58846))
+
 ## [1.3.0](https://github.com/omercnet/vscode-acp/compare/v1.2.0...v1.3.0) (2025-12-28)
 
 
